@@ -9,7 +9,7 @@ class CalculationEvaluator(SQLEvaluator):
     
     def as_sql(self, qn, connection, **extra):
         statement, values = super(CalculationEvaluator, self).as_sql(qn, connection)
-        return statement % tuple(values)
+        return '(%s)' % (statement % tuple(values))
 
 
 class Calculation(object):
@@ -20,8 +20,8 @@ class Calculation(object):
     def add_to_query(self, query, used_aliases):
         # Add the model fields to the query so that calculating the
         # aggregate field is correct
-        
-        query.add_fields([f.name for f in query.get_meta().fields])
+        if not query.select:
+            query.add_fields([f.name for f in query.get_meta().fields])
 
         for alias, calculation in self.calcs.iteritems():
             c = CalculationEvaluator(calculation, query)
