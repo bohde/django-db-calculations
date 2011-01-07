@@ -1,23 +1,37 @@
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
-
-Replace these with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
 
+from models import Number
+from django.db.models import F
+
 class SimpleTest(TestCase):
+    def setUp(self):
+        Number.objects.create(x=2,y=3)
+    
     def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.failUnlessEqual(1 + 1, 2)
-
-__test__ = {"doctest": """
-Another way to test that 1 + 1 is equal to 2.
-
->>> 1 + 1 == 2
-True
-"""}
-
+        number = Number.objects.calculate(z=F('x')+F('y'))[0]
+        self.assertEqual(number.z, 5)
+        self.assertEqual(number.x, 2)
+        self.assertEqual(number.y, 3)
+        
+    
+    def test_basic_sub(self):
+        number = Number.objects.calculate(z=F('x')-F('y'))[0]
+        self.assertEqual(number.z, -1)
+        self.assertEqual(number.x, 2)
+        self.assertEqual(number.y, 3)
+        
+    
+    def test_basic_mult(self):
+        number = Number.objects.calculate(z=F('x')*F('y'))[0]
+        self.assertEqual(number.z, 6)
+        self.assertEqual(number.x, 2)
+        self.assertEqual(number.y, 3)
+        
+    
+    def test_basic_div(self):
+        number = Number.objects.calculate(z=F('x')/F('y'))[0]
+        self.assertEqual(number.z, 2.0/3)
+        self.assertEqual(number.x, 2)
+        self.assertEqual(number.y, 3)
+        
+    
